@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENUSA - Senyum Nusantara</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        /* Variabel Warna Global */
+        :root {
+            --primary-color: #6a0dad; /* Ungu */
+            --secondary-color: #ffd700; /* Emas */
+            --accent-color: #00bfff; /* Biru muda */
+            --background-light: #f5f5f5;
+            --background-dark: #333;
+            --text-dark: #333;
+            --text-light: #666;
+            --card-bg-light: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --border-color: #ddd;
+            --error-red: #ff3333;
+        }
+
+        /* Base & Typography */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            scroll-behavior: smooth;
+        }
+
+        .main-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            min-height: 100vh;
+            background-color: #fff;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        p {
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--accent-color);
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--primary-color);
+        }
+
+        .primary-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            gap: 8px;
+        }
+
+        .primary-btn:hover {
+            background-color: #5a0099; /* Darker purple */
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-heading {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .section-heading::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--secondary-color);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        .section-tagline {
+            font-size: 1.1em;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .navbar-links {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        .navbar-links .nav-link {
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 5px 0;
+            position: relative;
+        }
+
+        .navbar-links .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            background-color: var(--accent-color);
+            left: 0;
+            bottom: -5px;
+            transition: width 0.3s ease;
+        }
+
+        .navbar-links .nav-link:hover::after,
+        .navbar-links .nav-link.active::after {
+            width: 100%;
+        }
+
+        .navbar-links .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .menu-toggle .bar {
+            width: 25px;
+            height: 3px;
+            background-color: var(--text-dark);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Mobile Navbar Styles */
+        @media (max-width: 900px) {
+            .navbar-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: #fff;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                padding: 20px 0;
+                border-top: 1px solid var(--border-color);
+                z-index: 999;
+                align-items: center;
+            }
+
+            .navbar-links.active {
+                display: flex;
+            }
+
+            .navbar-links li {
+                margin: 10px 0;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.active .bar:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+            .menu-toggle.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+            .menu-toggle.active .bar:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+        }
+
+        /* --- Welcome Section --- */
+        .welcome-section {
+            display: flex; /* Menggunakan flexbox untuk centering konten */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: calc(100vh - 70px); /* Tinggi layar penuh dikurangi navbar */
+            padding: 50px 20px;
+            background: linear-gradient(135deg, var(--background-light), #e0e7ee);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-circle-top-right, .welcome-circle-bottom-left {
+            position: absolute;
+            background-color: rgba(106, 13, 173, 0.1); /* RGB dari primary-color */
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(50px);
+            z-index: 1;
+        }
+        .welcome-circle-top-right {
+            width: 200px;
+            height: 200px;
+            top: -50px;
+            right: -50px;
+            background-color: rgba(106, 13, 173, 0.15);
+        }
+        .welcome-circle-bottom-left {
+            width: 300px;
+            height: 300px;
+            bottom: -80px;
+            left: -80px;
+            background-color: rgba(0, 191, 255, 0.15); /* RGB dari accent-color */
+        }
+
+        .icon-container {
+            position: absolute;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            z-index: 2;
+        }
+
+        .icon-container.right {
+            right: 50px;
+            top: 20%;
+        }
+
+        .icon-container.left {
+            left: 50px;
+            bottom: 20%;
+        }
+
+        .icon-container .icon {
+            font-size: 3em;
+            color: rgba(106, 13, 173, 0.3); /* Primary color with transparency */
+            opacity: 0.6;
+            transform: rotate(var(--rotation, 0deg));
+            transition: transform 0.5s ease;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 3;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .main-title {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-size: 1.8em;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            color: var(--text-dark);
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .welcome-bottom {
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Responsive Welcome Section */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 3em;
+            }
+            .subtitle {
+                font-size: 1.4em;
+            }
+            .tagline {
+                font-size: 1em;
+            }
+            .icon-container {
+                display: none; /* Hide icons on small screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 2.5em;
+            }
+            .subtitle {
+                font-size: 1.2em;
+            }
+            .primary-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* --- Features Section --- */
+        .features-section {
+            padding: 80px 40px;
+            background-color: #fcfcfc;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--card-shadow);
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon-wrapper {
+            background-color: var(--primary-color);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-icon {
+            color: white;
+            font-size: 2.5em;
+        }
+
+        .card-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .card-description {
+            font-size: 1em;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            flex-grow: 1; /* Agar deskripsi memenuhi ruang yang tersedia */
+        }
+
+        .feature-card .primary-btn {
+            width: fit-content;
+            margin: 0 auto;
+            background-color: var(--accent-color);
+        }
+
+        .feature-card.wide-card {
+            grid-column: span 2; /* Mengambil 2 kolom */
+        }
+
+        /* Warna untuk kartu fitur */
+        .feature-card.card-purple .card-icon-wrapper { background-color: var(--primary-color); }
+        .feature-card.card-blue .card-icon-wrapper { background-color: #007bff; } /* Biru */
+        .feature-card.card-orange .card-icon-wrapper { background-color: #ff8c00; } /* Oranye */
+        .feature-card.card-green .card-icon-wrapper { background-color: #28a745; } /* Hijau */
+
+        .feature-card.card-purple .primary-btn { background-color: var(--primary-color); }
+        .feature-card.card-blue .primary-btn { background-color: #007bff; }
+        .feature-card.card-orange .primary-btn { background-color: #ff8c00; }
+        .feature-card.card-green .primary-btn { background-color: #28a745; }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr; /* Satu kolom untuk mobile */
+            }
+            .feature-card.wide-card {
+                grid-column: span 1;
+            }
+        }
+
+        /* --- Content Section --- */
+        .content-section {
+            padding: 80px 40px;
+            background-color: var(--background-light);
+        }
+
+        .content-view {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-to-features-button, .back-to-list-button {
+            margin-top: 20px;
+            margin-bottom: 40px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-to-features-button:hover, .back-to-list-button:hover {
+            background-color: #0099e6;
+        }
+
+        /* Content List View (Budaya & Edukasi) */
+        .content-list-view {
+            margin-top: 30px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .content-category {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--card-shadow);
+            padding: 30px;
+        }
+
+        .category-title {
+            font-size: 2em;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            text-align: center;
+            position: relative;
+        }
+        .category-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: var(--secondary-color);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        .category-items {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .item-card {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-thumbnail {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+
+        .item-content {
+            flex-grow: 1;
+        }
+
+        .item-title {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+            line-height: 1.3;
+        }
+
+        .item-description {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .item-card .read-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .item-card .read-button:hover {
+            background-color: #0099e6;
+        }
+
+        /* Content Detail View */
+        .content-detail-container {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--card-shadow);
+            padding: 40px;
+            margin-top: 30px;
+        }
+
+        .content-detail-item .detail-title {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .content-detail-item .detail-body {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .content-detail-item .detail-body p {
+            margin-bottom: 1em;
+        }
+
+        .content-detail-item .detail-body ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 1em;
+        }
+
+        .content-detail-item .detail-body li {
+            margin-bottom: 0.5em;
+        }
+
+        .content-detail-item .download-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--secondary-color);
+            color: var(--text-dark);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .content-detail-item .download-link:hover {
+            background-color: #e6c200;
+        }
+
+        /* Map Section */
+        .map-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        #mapid {
+            height: 600px; /* Sesuaikan tinggi peta sesuai kebutuhan Anda */
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Leaflet popups */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* Leaflet map styles for depression levels */
+        .depresi-tinggi {
+            fillColor: #ff5252; /* Warna merah */
+            color: #b22222;
+            weight: 2;
+            opacity: 0.8;
+            fillOpacity: 0.7;
+        }
+
+        .depresi-sedang {
+            fillColor: #ffcc00; /* Warna kuning */
+            color: #b28c00;
+            weight: 1;
+            opacity: 0.7;
+            fillOpacity: 0.6;
+        }
+
+        .depresi-rendah {
+            fillColor: #66bb6a; /* Warna hijau */
+            color: #4CAF50;
+            weight: 1;
+            opacity: 0.7;
+            fillOpacity: 0.6;
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--card-shadow);
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .quiz-question {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .quiz-option-btn {
+            background-color: #f0f0f0;
+            border: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .quiz-option-btn:hover {
+            background-color: #e0e0e0;
+            border-color: var(--accent-color);
+        }
+
+        .quiz-option-btn.selected {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quiz-results {
+            margin-top: 40px;
+            font-size: 1.2em;
+            color: var(--text-dark);
+        }
+
+        .quiz-results h4 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .quiz-results p {
+            margin-bottom: 10px;
+        }
+
+        .quiz-feedback.positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .quiz-feedback.negative {
+            color: #ff5252;
+            font-weight: 600;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px var(--card-shadow);
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .day-name, .calendar-day {
+            padding: 10px 5px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .day-name {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .calendar-day {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            min-height: 80px; /* Cukup tinggi untuk konten */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            position: relative;
+            padding: 10px;
+        }
+
+        .calendar-day.empty {
+            background-color: #f9f9f9;
+            border: 1px dashed #eee;
+            cursor: default;
+        }
+
+        .calendar-day:not(.empty):hover {
+            background-color: #e6e6e6;
+            border-color: var(--accent-color);
+        }
+
+        .calendar-day.current-day {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .calendar-day.has-event {
+            background-color: #ffe0b2; /* Light orange */
+            border-color: #ff9800; /* Darker orange */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .calendar-day.has-event .day-number {
+            font-weight: bold;
+            color: var(--text-dark); /* Agar tetap terlihat jelas */
+        }
+        .calendar-day.current-day.has-event {
+            background-color: #28a745; /* Green for current day with event */
+            border-color: #1a7a30;
+            color: white;
+        }
+
+
+        .day-number {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .event-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin-top: 5px;
+            align-self: flex-end; /* Pindahkan ke sudut kanan bawah */
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .event-list {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .event-item {
+            background-color: #f0f8ff; /* Light blue */
+            border: 1px solid #cce7ff;
+            border-left: 5px solid var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-item span {
+            font-weight: 500;
+        }
+
+        .delete-event-btn {
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.2s ease;
+        }
+        .delete-event-btn:hover {
+            background-color: #b22222;
+        }
+
+        .add-event-form {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .add-event-form h4 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .add-event-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .add-event-form input[type="text"],
+        .add-event-form input[type="date"] {
+            width: calc(100% - 22px); /* Adjust for padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .add-event-form button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .add-event-form button:hover {
+            background-color: #5a0099;
+        }
+
+        /* --- Authentication Sections (Login/Register) --- */
+        .auth-section {
+            display: flex; /* Menggunakan flexbox untuk centering konten */
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px); /* Tinggi layar penuh dikurangi navbar */
+            padding: 50px 20px;
+            background: linear-gradient(135deg, var(--background-light), #e0e7ee);
+        }
+
+        .auth-container {
+            background-color: var(--card-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-title {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            font-size: 1em;
+            color: var(--text-light);
+        }
+
+        .auth-form {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .input-group input[type="email"],
+        .input-group input[type="password"],
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box; /* Pastikan padding tidak menambah lebar */
+        }
+
+        .input-group input[type="email"]:focus,
+        .input-group input[type="password"]:focus,
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2);
+        }
+
+        .error-message {
+            color: var(--error-red);
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none; /* Sembunyikan secara default */
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+
+        .checkbox-container {
+            display: block;
+            position: relative;
+            padding-left: 25px;
+            cursor: pointer;
+            user-select: none;
+            color: var(--text-light);
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 18px;
+            width: 18px;
+            background-color: #eee;
+            border-radius: 4px;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: var(--accent-color);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        .forgot-password {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .auth-button {
+            width: 100%;
+            font-size: 1.1em;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        .auth-footer {
+            font-size: 0.95em;
+            color: var(--text-light);
+        }
+
+        .auth-link {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background-color: var(--background-dark);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            font-size: 0.9em;
+            margin-top: 50px; /* Jarak dari section terakhir */
+        }
+
+        @media (max-width: 600px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+            .auth-title {
+                font-size: 2em;
+            }
+            .input-group label {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <header class="navbar">
+            <a href="#welcome" class="navbar-brand">SENUSA</a>
+            <nav>
+                <ul class="navbar-links" id="navbarLinks">
+                    <li><a href="#welcome" class="nav-link active">Beranda</a></li>
+                    <li><a href="#features" class="nav-link">Fitur</a></li>
+                    <li><a href="#" id="navBudayaLink" class="nav-link">Budaya & Edukasi</a></li>
+                    <li><a href="#" id="navPetaLink" class="nav-link">Peta Lokasi</a></li>
+                    <li><a href="#" id="navTesLink" class="nav-link">Tes & Kuis</a></li>
+                    <li><a href="#" id="navKalenderLink" class="nav-link">Kalender Self-Care</a></li>
+                    <li><a href="#login" class="nav-link">Login</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle" id="mobileMenuToggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </header>
+
+        <section id="welcome" class="welcome-section">
+            <div class="welcome-circle-top-right circle"></div>
+            <div class="welcome-circle-bottom-left circle"></div>
+
+            <div class="icon-container">
+                <i class="fas fa-heart icon"></i>
+                <i class="fas fa-leaf icon"></i>
+            </div>
+            <div class="icon-container right">
+                <i class="fas fa-brain icon"></i>
+                <i class="fas fa-yin-yang icon"></i>
+            </div>
+
+            <div class="welcome-content">
+                <h1 class="main-title">Welcome to our platform SENUSA</h1>
+                <h2 class="subtitle">Sehat Nusantara Sadar: Sehat Jiwa, Kaya Budaya!</h2>
+                <p class="tagline">Temukan kedamaian batin dan kembangkan diri melalui eksplorasi budaya serta edukasi kesehatan mental yang inklusif.</p>
+            </div>
+            <div class="welcome-bottom">
+                <a href="#features" class="start-button">
+                    Next <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <section id="features" class="features-section" style="display: none;">
+            <div class="features-header section-header">
+                <h2 class="features-heading section-heading">Fitur Unggulan SENUSA</h2>
+                <p class="features-tagline section-tagline">SENUSA hadir dengan beragam fitur interaktif untuk mendukung kesehatan mental dan memperkaya pengetahuan budaya Anda.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card card-purple" data-target-tab="budaya-edukasi-list">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-book-open card-icon"></i>
+                    </div>
+                    <h3 class="card-title">Budaya & Edukasi</h3>
+                    <p class="card-description">Jelajahi kekayaan budaya Indonesia dan dapatkan edukasi penting tentang kesehatan mental.</p>
+                    <button class="primary-btn view-feature-btn">Pelajari Lebih Lanjut <i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <div class="feature-card card-blue" data-target-tab="peta-lokasi">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-map-marked-alt card-icon"></i>
+                    </div>
+                    <h3 class="card-title">Peta Lokasi</h3>
+                    <p class="card-description">Temukan sentra layanan kesehatan mental dan lihat tingkat depresi simulasi di seluruh provinsi Indonesia.</p>
+                    <button class="primary-btn view-feature-btn">Lihat Peta <i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <div class="feature-card card-orange" data-target-tab="tes-kuis">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-clipboard-question card-icon"></i>
+                    </div>
+                    <h3 class="card-title">Tes & Kuis</h3>
+                    <p class="card-description">Uji pemahaman Anda tentang kesehatan mental dan budaya dengan kuis interaktif.</p>
+                    <button class="primary-btn view-feature-btn">Mulai Tes <i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <div class="feature-card wide-card card-green" data-target-tab="kalender-selfcare">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-calendar-check card-icon"></i>
+                    </div>
+                    <h3 class="card-title">Kalender Self-Care</h3>
+                    <p class="card-description">Rencanakan dan pantau aktivitas self-care Anda untuk menjaga kesehatan mental setiap hari.</p>
+                    <button class="primary-btn view-feature-btn">Atur Jadwal <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-section" class="content-section" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-heading" id="contentSectionHeading"></h2>
+                <p class="section-tagline" id="contentSectionTagline"></p>
+                <button class="primary-btn back-to-features-button" style="display: none;"><i class="fas fa-arrow-left"></i> Kembali ke Fitur</button>
+            </div>
+
+            <div class="content-view">
+                <div id="budaya-edukasi-list" class="content-list-view" style="display: none;">
+                    <div class="content-grid">
+                        <div class="content-category">
+                            <h3 class="category-title">Budaya Nusantara (Fokus Riau)</h3>
+                            <div class="category-items">
+                                <div class="item-card" data-item-id="tari-persembahan">
+                                    <img src="https://via.placeholder.com/150x100?text=Tari+Persembahan" alt="Tari Persembahan" class="item-thumbnail">
+                                    <div class="item-content">
+                                        <h4 class="item-title">Tari Persembahan</h4>
+                                        <p class="item-description">Tarian penyambutan khas Melayu Riau.</p>
+                                        <button class="read-button" data-item-id="tari-persembahan">Baca Selengkapnya</button>
+                                    </div>
+                                </div>
+                                <div class="item-card" data-item-id="rumah-adat-selaso-jatuh-kembar">
+                                    <img src="https://via.placeholder.com/150x100?text=Selaso+Jatuh+Kembar" alt="Rumah Adat Selaso Jatuh Kembar" class="item-thumbnail">
+                                    <div class="item-content">
+                                        <h4 class="item-title">Rumah Adat Selaso Jatuh Kembar</h4>
+                                        <p class="item-description">Arsitektur tradisional Melayu Riau.</p>
+                                        <button class="read-button" data-item-id="rumah-adat-selaso-jatuh-kembar">Baca Selengkapnya</button>
+                                    </div>
+                                </div>
+                                <div class="item-card" data-item-id="lagu-soleram">
+                                    <img src="https://via.placeholder.com/150x100?text=Lagu+Soleram" alt="Lagu Soleram" class="item-thumbnail">
+                                    <div class="item-content">
+                                        <h4 class="item-title">Lagu Soleram</h4>
+                                        <p class="item-description">Lagu daerah Riau yang populer dan syarat makna.</p>
+                                        <button class="read-button" data-item-id="lagu-soleram">Baca Selengkapnya</button>
+                                    </div>
+                                </div>
+                                </div>
+                        </div>
+
+                        <div class="content-category">
+                            <h3 class="category-title">Edukasi Kesehatan Mental</h3>
+                            <div class="category-items">
+                                <div class="item-card" data-item-id="pentingnya-mindfulness">
+                                    <img src="https://via.placeholder.com/150x100?text=Mindfulness" alt="Pentingnya Mindfulness" class="item-thumbnail">
+                                    <div class="item-content">
+                                        <h4 class="item-title">Pentingnya Mindfulness</h4>
+                                        <p class="item-description">Mempelajari teknik mindfulness untuk mengurangi stres dan meningkatkan fokus.</p>
+                                        <button class="read-button" data-item-id="pentingnya-mindfulness">Baca Selengkapnya</button>
+                                    </div>
+                                </div>
+                                <div class="item-card" data-item-id="tips-mengelola-emosi">
+                                    <img src="https://via.placeholder.com/150x100?text=Emosi" alt="Tips Mengelola Emosi" class="item-thumbnail">
+                                    <div class="item-content">
+                                        <h4 class="item-title">Tips Mengelola Emosi</h4>
+                                        <p class="item-description">Strategi praktis untuk mengenali dan mengelola emosi negatif dengan sehat.</p>
+                                        <button class="read-button" data-item-id="tips-mengelola-emosi">Baca Selengkapnya</button>
+                                    </div>
+                                </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-detail-view" class="content-detail-container" style="display: none;">
+                    <button class="primary-btn back-to-list-button"><i class="fas fa-arrow-left"></i> Kembali ke Daftar</button>
+                    <div id="detail-content-placeholder" class="content-detail-item">
+                        <h3 class="detail-title" id="detail-title"></h3>
+                        <div class="detail-body" id="detail-body"></div>
+                    </div>
+                </div>
+
+                <div id="peta-lokasi" class="map-container" style="display: none; text-align: center;">
+                    <div id="mapid"></div>
+                    <p style="margin-top: 20px; font-style: italic; color: var(--text-light);">Peta menunjukkan tingkat depresi (simulasi) di provinsi-provinsi Indonesia. Klik pada provinsi untuk detail.</p>
+                </div>
+
+                <div id="tes-kuis" class="quiz-container" style="display: none;">
+                    <h3>Tes Kesehatan Mental Sederhana</h3>
+                    <div id="quiz-area">
+                        <p class="quiz-question" id="quiz-question"></p>
+                        <div class="quiz-options" id="quiz-options">
+                            </div>
+                        <div class="quiz-navigation">
+                            <button class="primary-btn" id="prev-question-btn" style="display: none;"><i class="fas fa-chevron-left"></i> Sebelumnya</button>
+                            <button class="primary-btn" id="next-question-btn">Selanjutnya <i class="fas fa-chevron-right"></i></button>
+                            <button class="primary-btn" id="submit-quiz-btn" style="display: none;">Selesai <i class="fas fa-check"></i></button>
+                        </div>
+                    </div>
+                    <div id="quiz-results" class="quiz-results" style="display: none;">
+                        <h4>Hasil Tes Anda</h4>
+                        <p id="result-text"></p>
+                        <p id="result-feedback"></p>
+                        <button class="primary-btn" id="restart-quiz-btn" style="margin-top: 20px;">Ulangi Tes</button>
+                    </div>
+                </div>
+
+                <div id="kalender-selfcare" class="calendar-container" style="display: none;">
+                    <div class="calendar-header">
+                        <button class="primary-btn" id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="currentMonthYear"></h3>
+                        <button class="primary-btn" id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="day-name">Min</div>
+                        <div class="day-name">Sen</div>
+                        <div class="day-name">Sel</div>
+                        <div class="day-name">Rab</div>
+                        <div class="day-name">Kam</div>
+                        <div class="day-name">Jum</div>
+                        <div class="day-name">Sab</div>
+                        </div>
+
+                    <div class="add-event-form">
+                        <h4>Tambahkan Aktivitas Self-Care</h4>
+                        <label for="eventDate">Tanggal:</label>
+                        <input type="date" id="eventDate" required>
+                        <label for="eventText">Aktivitas:</label>
+                        <input type="text" id="eventText" placeholder="Contoh: Meditasi 15 menit, Membaca buku" required>
+                        <button id="addEventBtn">Tambahkan</button>
+                    </div>
+
+                    <div class="event-list" id="eventList">
+                        <h4>Aktivitas Terjadwal</h4>
+                        <p id="noEventsMessage" style="color: var(--text-light);">Belum ada aktivitas self-care yang ditambahkan.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="login" class="auth-section" style="display: none;">
+            <div class="auth-container" id="loginContainer">
+                <div class="auth-header">
+                    <h2 class="auth-title">Selamat Datang Kembali!</h2>
+                    <p class="auth-subtitle">Silakan masuk ke akun Anda untuk pengalaman yang lebih personal.</p>
+                </div>
+                <form class="auth-form" id="loginForm">
+                    <div class="input-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="masukkan email Anda" required>
+                        <p class="error-message" id="loginEmailError"></p>
+                    </div>
+                    <div class="input-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="masukkan password Anda" required>
+                        <p class="error-message" id="loginPasswordError"></p>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            Ingat saya
+                            <input type="checkbox" checked="checked">
+                            <span class="checkmark"></span>
+                        </label>
+                        <a href="#" class="forgot-password">Lupa Password?</a>
+                    </div>
+                    <button type="submit" class="primary-btn auth-button">Login</button>
+                </form>
+                <div class="auth-footer">
+                    Belum punya akun? <a href="#" class="auth-link" id="showRegister">Daftar Sekarang</a>
+                </div>
+            </div>
+
+            <div class="auth-container" id="registerContainer" style="display: none;">
+                <div class="auth-header">
+                    <h2 class="auth-title">Buat Akun Baru</h2>
+                    <p class="auth-subtitle">Bergabunglah dengan SENUSA dan mulai perjalanan Anda menuju Senyum Nusantara.</p>
+                </div>
+                <form class="auth-form" id="registerForm">
+                    <div class="input-group">
+                        <label for="registerName">Nama Lengkap</label>
+                        <input type="text" id="registerName" placeholder="masukkan nama lengkap Anda" required>
+                        <p class="error-message" id="registerNameError"></p>
+                    </div>
+                    <div class="input-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" placeholder="masukkan email Anda" required>
+                        <p class="error-message" id="registerEmailError"></p>
+                    </div>
+                    <div class="input-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" placeholder="buat password" required>
+                        <p class="error-message" id="registerPasswordError"></p>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirmPassword">Konfirmasi Password</label>
+                        <input type="password" id="confirmPassword" placeholder="ulangi password" required>
+                        <p class="error-message" id="confirmPasswordError"></p>
+                    </div>
+                    <button type="submit" class="primary-btn auth-button">Daftar</button>
+                </form>
+                <div class="auth-footer">
+                    Sudah punya akun? <a href="#" class="auth-link" id="showLogin">Login Sekarang</a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>© 2025 SENUSA. Semua Hak Cipta Dilindungi.</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Elemen DOM Umum ---
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navbarLinks = document.getElementById('navbarLinks');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const welcomeSection = document.getElementById('welcome');
+            const featuresSection = document.getElementById('features');
+            const contentSection = document.getElementById('content-section');
+            const loginSection = document.getElementById('login');
+
+            // --- Elemen untuk Konten Dinamis (Section 3) ---
+            const contentSectionHeading = document.getElementById('contentSectionHeading');
+            const contentSectionTagline = document.getElementById('contentSectionTagline');
+            const budayaEdukasiList = document.getElementById('budaya-edukasi-list');
+            const petaLokasi = document.getElementById('peta-lokasi');
+            const tesKuis = document.getElementById('tes-kuis');
+            const kalenderSelfCare = document.getElementById('kalender-selfcare');
+            const contentDetailView = document.getElementById('content-detail-view');
+            const detailTitle = document.getElementById('detail-title');
+            const detailBody = document.getElementById('detail-body');
+
+            // --- Tombol Navigasi Internal ---
+            const backToFeaturesBtn = document.querySelector('.back-to-features-button');
+            const backToListBtn = document.querySelector('.back-to-list-button');
+            const startButton = document.querySelector('.start-button');
+            const featureCards = document.querySelectorAll('.feature-card');
+            const readMoreButtons = document.querySelectorAll('.item-card .read-button');
+            const itemCards = document.querySelectorAll('.content-category .item-card');
+
+            // --- Elemen Login/Register ---
+            const loginContainer = document.getElementById('loginContainer');
+            const registerContainer = document.getElementById('registerContainer');
+            const showRegisterLink = document.getElementById('showRegister');
+            const showLoginLink = document.getElementById('showLogin');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            let map; // Variabel untuk menyimpan instance peta Leaflet
+            let geojsonLayer; // Variabel untuk menyimpan layer GeoJSON provinsi
+
+            // --- DATA APLIKASI ---
+
+            // Data Konten Budaya & Edukasi
+            const contentData = {
+                'tari-persembahan': {
+                    title: 'Tari Persembahan: Sambutan Khas Melayu Riau',
+                    body: `
+                        <p>Tari Persembahan, atau juga dikenal sebagai Tari Makan Sirih, adalah tarian tradisional Melayu Riau yang berfungsi sebagai tarian penyambutan tamu kehormatan atau pembuka suatu acara resmi. Tarian ini melambangkan penghormatan, keramahan, dan ungkapan rasa syukur.</p>
+                        <p>Gerakan tariannya lembut, anggun, dan penuh makna, diiringi musik Melayu tradisional seperti biola, akordeon, gambus, dan rebana. Puncak dari tarian ini adalah saat penari membawa cerano (wadah sirih) dan menyuguhkan sirih kepada tamu, yang melambangkan kebersamaan dan ikatan persaudaraan.</p>
+                        <p>Tari Persembahan bukan hanya sebuah seni pertunjukan, tetapi juga cerminan nilai-nilai adat dan budaya Melayu Riau yang menjunjung tinggi etika dan kesantunan dalam menyambut orang lain.</p>
+                        <p>Untuk informasi lebih lanjut: <a href="brosur-tari-persembahan.pdf" class="download-link" target="_blank"><i class="fas fa-download"></i> Unduh Brosur Tari Persembahan</a></p>
+                    `
+                },
+                'rumah-adat-selaso-jatuh-kembar': {
+                    title: 'Rumah Adat Selaso Jatuh Kembar: Arsitektur Melayu Riau',
+                    body: `
+                        <p>Rumah Adat Selaso Jatuh Kembar adalah salah satu bentuk arsitektur tradisional khas masyarakat Melayu Riau. Nama "Selaso Jatuh Kembar" mengacu pada ciri khas bangunannya, yaitu memiliki dua selasar (teras) yang posisinya lebih rendah dari ruang utama (jatuh) dan berbentuk kembar.</p>
+                        <p>Rumah ini umumnya dibangun di atas tiang dan memiliki tangga sebagai akses masuk. Ornamen ukiran Melayu yang indah menghiasi setiap bagian rumah, mencerminkan nilai estetika dan filosofi hidup masyarakatnya. Ruang-ruangnya terbagi berdasarkan fungsi, seperti ruang tamu, ruang keluarga, kamar tidur, dan dapur.</p>
+                        <p>Selaso Jatuh Kembar bukan hanya tempat tinggal, tetapi juga pusat kegiatan adat, pertemuan keluarga, dan pelestarian nilai-nilai budaya Melayu. Ini adalah simbol keagungan dan kearifan lokal masyarakat Riau.</p>
+                        <p>Pelajari lebih detail: <a href="makalah-selaso-jatuh-kembar.pdf" class="download-link" target="_blank"><i class="fas fa-download"></i> Unduh Makalah Rumah Adat</a></p>
+                    `
+                },
+                'lagu-soleram': {
+                    title: 'Lagu Soleram: Warisan Musik Tradisional Riau',
+                    body: `
+                        <p>Soleram adalah salah satu lagu daerah yang sangat populer dari Riau, Indonesia. Lagu ini memiliki melodi yang sederhana namun sangat mudah diingat, sering dinyanyikan sebagai lagu pengantar tidur atau pengiring permainan anak-anak.</p>
+                        <p>Liriknya berisi pesan moral tentang persahabatan dan perpisahan, di mana setiap bait diakhiri dengan pengulangan kata "Soleram". Keindahan lagu ini terletak pada kesederhanaannya yang universal dan kemampuannya untuk menanamkan nilai-nilai luhur sejak dini.</p>
+                        <p>Meskipun sering dianggap lagu anak-anak, Soleram juga menjadi simbol identitas budaya Melayu Riau dan sering dibawakan dalam berbagai acara seni dan budaya, melestarikan warisan musik tradisional yang berharga.</p>
+                        <p>Dengarkan lagunya di sini: <a href="https://www.youtube.com/watch?v=contoh-link-soleram" class="download-link" target="_blank"><i class="fas fa-play-circle"></i> Tonton di YouTube</a></p>
+                    `
+                },
+                'pentingnya-mindfulness': {
+                    title: 'Mindfulness: Kunci Ketenangan Jiwa',
+                    body: `
+                        <p>Mindfulness adalah praktik memusatkan perhatian pada momen saat ini, tanpa menghakimi. Ini melibatkan kesadaran penuh terhadap pikiran, perasaan, sensasi tubuh, dan lingkungan sekitar Anda. Dalam dunia yang serba cepat, mindfulness menawarkan jeda yang sangat dibutuhkan, membantu kita untuk tidak terlarut dalam kecemasan masa lalu atau kekhawatiran masa depan.</p>
+                        <p>Manfaat mindfulness sangat beragam, termasuk mengurangi stres dan kecemasan, meningkatkan fokus dan konsentrasi, memperbaiki kualitas tidur, serta membangun empati dan koneksi interpersonal yang lebih baik. Praktik ini bisa dilakukan melalui meditasi formal, atau dengan membawa kesadaran penuh ke dalam aktivitas sehari-hari seperti makan, berjalan, atau bernapas.</p>
+                        <p>Memulai praktik mindfulness tidak memerlukan banyak waktu atau peralatan khusus. Cukup dengan meluangkan beberapa menit setiap hari untuk duduk tenang dan fokus pada napas Anda. Dengan latihan teratur, Anda akan mulai merasakan ketenangan dan kejernihan pikiran yang lebih besar.</p>
+                        <p>Unduh panduan singkat kami: <a href="panduan-mindfulness.pdf" class="download-link" target="_blank"><i class="fas fa-download"></i> Unduh Panduan Mindfulness</a></p>
+                    `
+                },
+                'tips-mengelola-emosi': {
+                    title: 'Mengelola Emosi dengan Cerdas dan Sehat',
+                    body: `
+                        <p>Emosi adalah bagian alami dari pengalaman manusia, namun terkadang emosi negatif seperti marah, sedih, atau frustrasi bisa terasa membanjiri. Mengelola emosi bukan berarti menekannya, melainkan mengenali, memahami, dan meresponsnya dengan cara yang konstruktif dan sehat.</p>
+                        <p>Beberapa tips untuk mengelola emosi secara efektif antara lain:</p>
+                        <ul>
+                            <li><strong>Kenali dan Beri Nama Emosi Anda:</strong> Kadang, hanya dengan mengenali "Saya sedang merasa cemas" bisa membantu mengurangi intensitasnya.</li>
+                            <li><strong>Bernapas Dalam:</strong> Teknik pernapasan dalam dapat menenangkan sistem saraf dan meredakan respons stres.</li>
+                            <li><strong>Ekspresikan Diri:</strong> Bicarakan perasaan Anda dengan teman tepercaya, tulis di jurnal, atau salurkan melalui seni.</li>
+                            <li><strong>Bergerak Aktif:</strong> Olahraga dapat melepaskan endorfin yang meningkatkan suasana hati.</li>
+                            <li><strong>Cari Perspektif Baru:</strong> Coba lihat situasi dari sudut pandang lain, atau fokus pada hal-hal yang bisa Anda kontrol.</li>
+                        </ul>
+                        <p>Jika emosi terasa terlalu berat untuk dikelola sendiri, jangan ragu untuk mencari bantuan profesional dari psikolog atau konselor. Mencari bantuan adalah tanda kekuatan, bukan kelemahan.</p>
+                        <p>Dapatkan lebih banyak tips di sini: <a href="tips-emosi.pdf" class="download-link" target="_blank"><i class="fas fa-download"></i> Unduh Ebook Tips Emosi</a></p>
+                    `
+                }
+            };
+
+            // Data Simulasi Tingkat Depresi per Provinsi (Indonesia)
+            // Tingkat Depresi (skala 1-3: 1=Rendah, 2=Sedang, 3=Tinggi)
+            const tingkatDepresiProvinsi = {
+                "Aceh": 2, "Sumatera Utara": 2, "Sumatera Barat": 1, "Riau": 3, "Jambi": 2,
+                "Sumatera Selatan": 2, "Bengkulu": 1, "Lampung": 2, "Kepulauan Bangka Belitung": 1,
+                "Kepulauan Riau": 2, "DKI Jakarta": 3, "Jawa Barat": 3, "Jawa Tengah": 2,
+                "DI Yogyakarta": 2, "Jawa Timur": 3, "Banten": 2, "Bali": 1, "Nusa Tenggara Barat": 2,
+                "Nusa Tenggara Timur": 1, "Kalimantan Barat": 2, "Kalimantan Tengah": 1,
+                "Kalimantan Selatan": 2, "Kalimantan Timur": 2, "Kalimantan Utara": 1,
+                "Sulawesi Utara": 2, "Sulawesi Tengah": 1, "Sulawesi Selatan": 2,
+                "Sulawesi Tenggara": 1, "Gorontalo": 2, "Sulawesi Barat": 1, "Maluku": 1,
+                "Maluku Utara": 1, "Papua Barat": 2, "Papua": 2, "Papua Selatan": 2,
+                "Papua Tengah": 2, "Papua Pegunungan": 2,
+            };
+
+            // Data Kuis
+            const quizQuestions = [
+                {
+                    question: "Merasa sedih atau putus asa secara terus-menerus selama lebih dari dua minggu bisa menjadi tanda...",
+                    options: ["Kelelahan Biasa", "Depresi", "Stres Ringan", "Kurang Tidur"],
+                    answer: 1, // Index of correct answer
+                    feedback: {
+                        correct: "Tepat sekali! Kesedihan yang berkepanjangan adalah salah satu gejala utama depresi.",
+                        incorrect: "Jawaban Anda kurang tepat. Kesedihan yang terus-menerus bisa menjadi indikasi depresi. Penting untuk mencari bantuan jika Anda mengalaminya."
+                    }
+                },
+                {
+                    question: "Aktivitas apa yang paling sering dikaitkan dengan Tari Persembahan dari Riau?",
+                    options: ["Panen Raya", "Penyambutan Tamu", "Upacara Kematian", "Pernikahan Adat"],
+                    answer: 1,
+                    feedback: {
+                        correct: "Benar! Tari Persembahan secara tradisional digunakan untuk menyambut tamu kehormatan.",
+                        incorrect: "Kurang tepat. Tari Persembahan adalah tarian penyambutan yang berasal dari Riau. Mari pelajari lebih banyak tentang budaya lokal!"
+                    }
+                },
+                {
+                    question: "Salah satu teknik sederhana untuk melatih mindfulness adalah...",
+                    options: ["Memikirkan Masa Lalu", "Bernapas Dalam dan Sadar", "Menonton TV", "Multi-tasking"],
+                    answer: 1,
+                    feedback: {
+                        correct: "Hebat! Bernapas dalam dan penuh kesadaran adalah inti dari praktik mindfulness.",
+                        incorrect: "Bukan itu jawabannya. Mindfulness berpusat pada kesadaran momen kini, dan pernapasan adalah kuncinya."
+                    }
+                }
+            ];
+            let currentQuestionIndex = 0;
+            let quizScore = 0;
+            let userAnswers = []; // To store user's selected answer for each question
+
+            // Data Kalender (Disimpan di localStorage)
+            let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+            let currentCalendarDate = new Date(); // Objek Date untuk bulan dan tahun yang sedang dilihat
+
+            // --- FUNGSI-FUNGSI UTAMA UNTUK MANAJEMEN TAMPILAN ---
+
+            /**
+             * Menampilkan satu bagian (section) utama di halaman dan menyembunyikan yang lainnya.
+             * Mengatur tampilan CSS (flex/block) sesuai kebutuhan section.
+             * @param {HTMLElement} sectionToShow - Elemen section yang akan ditampilkan.
+             */
+            function showSection(sectionToShow) {
+                const allSections = [welcomeSection, featuresSection, contentSection, loginSection];
+                allSections.forEach(section => {
+                    if (section === sectionToShow) {
+                        section.style.display = (section === welcomeSection || section === loginSection) ? 'flex' : 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+                // Gulir ke section yang baru ditampilkan
+                sectionToShow.scrollIntoView({ behavior: 'smooth' });
+
+                // Sembunyikan semua tombol "Kembali" saat berpindah section utama
+                backToFeaturesBtn.style.display = 'none';
+                backToListBtn.style.display = 'none';
+            }
+
+            /**
+             * Menampilkan tab konten spesifik di dalam contentSection (misal: budaya, peta, kuis, kalender).
+             * Memperbarui judul dan tagline contentSection.
+             * @param {string} tabId - ID dari elemen tab konten yang akan ditampilkan.
+             */
+            function showContentTab(tabId) {
+                const contentTabs = [budayaEdukasiList, petaLokasi, tesKuis, kalenderSelfCare];
+                // Sembunyikan semua tab konten terlebih dahulu
+                contentTabs.forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                // Pastikan detail view tersembunyi saat beralih tab
+                contentDetailView.style.display = 'none';
+
+                // Tampilkan tab yang dipilih
+                const targetTab = document.getElementById(tabId);
+                if (targetTab) {
+                    targetTab.style.display = 'block';
+                }
+
+                // Perbarui heading dan tagline contentSection sesuai tab yang aktif
+                switch(tabId) {
+                    case 'budaya-edukasi-list':
+                        contentSectionHeading.textContent = 'Budaya Riau & Edukasi Kesehatan Mental';
+                        contentSectionTagline.textContent = 'Jelajahi kekayaan budaya Riau dan edukasi penting tentang kesehatan mental.';
+                        break;
+                    case 'peta-lokasi':
+                        contentSectionHeading.textContent = 'Peta Tingkat Depresi Provinsi';
+                        contentSectionTagline.textContent = 'Lihat tingkat depresi (simulasi) di berbagai provinsi Indonesia. Klik pada provinsi untuk detail.';
+                        initMap(); // Panggil inisialisasi peta saat tab peta dibuka
+                        break;
+                    case 'tes-kuis':
+                        contentSectionHeading.textContent = 'Tes & Kuis Interaktif';
+                        contentSectionTagline.textContent = 'Uji pemahaman Anda tentang kesehatan mental dan kekayaan budaya dengan kuis interaktif.';
+                        startQuiz(); // Mulai kuis saat tab dibuka
+                        break;
+                    case 'kalender-selfcare':
+                        contentSectionHeading.textContent = 'Kalender Self-Care';
+                        contentSectionTagline.textContent = 'Rencanakan dan pantau aktivitas self-care harian Anda untuk menjaga kesehatan mental setiap hari.';
+                        renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Render kalender
+                        break;
+                }
+
+                // Tampilkan tombol "Kembali ke Fitur" karena kita berada di dalam contentSection
+                backToFeaturesBtn.style.display = 'inline-flex';
+            }
+
+            /**
+             * Menampilkan detail spesifik dari konten Budaya & Edukasi.
+             * @param {string} itemId - ID dari item konten yang akan ditampilkan detailnya.
+             */
+            function showContentDetail(itemId) {
+                budayaEdukasiList.style.display = 'none'; // Sembunyikan daftar konten
+                contentDetailView.style.display = 'block'; // Tampilkan area detail
+                backToListBtn.style.display = 'inline-flex'; // Tampilkan tombol "Kembali ke Daftar"
+
+                const item = contentData[itemId];
+                if (item) {
+                    detailTitle.textContent = item.title;
+                    detailBody.innerHTML = item.body; // Menggunakan innerHTML karena body bisa berisi tag HTML
+                } else {
+                    detailTitle.textContent = 'Konten Tidak Ditemukan';
+                    detailBody.innerHTML = '<p>Maaf, konten yang Anda cari tidak tersedia.</p>';
+                }
+            }
+
+            // --- FUNGSI UNTUK PETA LEAFLET ---
+
+            /**
+             * Mengembalikan warna heksadesimal berdasarkan tingkat depresi.
+             * Digunakan untuk styling provinsi di peta.
+             * @param {number} tingkat - Tingkat depresi (1=Rendah, 2=Sedang, 3=Tinggi).
+             * @returns {string} Warna heksadesimal.
+             */
+            function getColor(tingkat) {
+                switch (tingkat) {
+                    case 3: return '#ff5252'; // Tinggi (Merah)
+                    case 2: return '#ffcc00'; // Sedang (Kuning)
+                    case 1: return '#66bb6a'; // Rendah (Hijau)
+                    default: return '#ccc'; // Default untuk data tidak ada
+                }
+            }
+
+            /**
+             * Menentukan gaya visual (warna, border, opacity) untuk setiap provinsi di peta.
+             * @param {object} feature - Objek GeoJSON feature untuk provinsi.
+             * @returns {object} Objek gaya Leaflet.
+             */
+            function style(feature) {
+                // Pastikan nama properti provinsi sesuai dengan GeoJSON yang dimuat
+                const namaProvinsi = feature.properties.Propinsi || feature.properties.name;
+                const tingkat = tingkatDepresiProvinsi[namaProvinsi] || 0; // Ambil tingkat depresi, default 0 jika tidak ada data
+
+                return {
+                    fillColor: getColor(tingkat),
+                    weight: 1,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
+
+            /**
+             * Fungsi yang dipanggil saat mouse masuk ke area provinsi di peta.
+             * Mengubah gaya provinsi dan memperbarui judul.
+             * @param {Event} e - Event mouseover dari Leaflet.
+             */
+            function highlightFeature(e) {
+                const layer = e.target;
+                layer.setStyle({
+                    weight: 3,
+                    color: '#666',
+                    dashArray: '',
+                    fillOpacity: 0.9
+                });
+                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                    layer.bringToFront();
+                }
+                // Perbarui judul peta dengan nama provinsi yang di-hover
+                contentSectionHeading.textContent = `Peta Tingkat Depresi: ${layer.feature.properties.Propinsi || layer.feature.properties.name}`;
+            }
+
+            /**
+             * Fungsi yang dipanggil saat mouse keluar dari area provinsi di peta.
+             * Mengembalikan gaya provinsi ke semula dan judul peta.
+             * @param {Event} e - Event mouseout dari Leaflet.
+             */
+            function resetHighlight(e) {
+                if (geojsonLayer) {
+                    geojsonLayer.resetStyle(e.target);
+                }
+                // Kembalikan judul peta ke semula
+                contentSectionHeading.textContent = 'Peta Tingkat Depresi Provinsi';
+            }
+
+            /**
+             * Fungsi yang dipanggil saat provinsi di peta diklik.
+             * Melakukan zoom ke provinsi tersebut dan menampilkan popup info.
+             * @param {Event} e - Event click dari Leaflet.
+             */
+            function zoomToFeature(e) {
+                map.fitBounds(e.target.getBounds()); // Zoom ke batas provinsi yang diklik
+
+                const namaProvinsi = e.target.feature.properties.Propinsi || e.target.feature.properties.name;
+                const tingkat = tingkatDepresiProvinsi[namaProvinsi] || 0;
+                let keteranganDepresi = "Data tidak tersedia";
+                if (tingkat === 3) keteranganDepresi = "Tinggi";
+                else if (tingkat === 2) keteranganDepresi = "Sedang";
+                else if (tingkat === 1) keteranganDepresi = "Rendah";
+
+                // Tampilkan popup dengan info provinsi dan tingkat depresi
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(`<b>${namaProvinsi}</b><br>Tingkat Depresi: ${keteranganDepresi}`)
+                    .openOn(map);
+            }
+
+            /**
+             * Menambahkan event listener ke setiap layer (provinsi) pada peta.
+             * @param {object} feature - Objek GeoJSON feature.
+             * @param {object} layer - Layer Leaflet yang sesuai dengan feature.
+             */
+            function onEachFeature(feature, layer) {
+                layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: resetHighlight,
+                    click: zoomToFeature
+                });
+            }
+
+            /**
+             * Menginisialisasi peta Leaflet, memuat data GeoJSON provinsi Indonesia,
+             * dan menerapkan gaya serta interaksi.
+             */
+            function initMap() {
+                // Hapus peta sebelumnya jika sudah ada (untuk menghindari duplikasi saat beralih tab)
+                if (map) {
+                    map.remove();
+                }
+
+                // Inisialisasi peta di koordinat tengah Indonesia (sekitar Kalimantan) dengan zoom out
+                map = L.map('mapid').setView([-2.548926, 118.014863], 5);
+
+                // Tambahkan tile layer dari OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Muat data GeoJSON provinsi Indonesia dari CDN
+                fetch('https://raw.githubusercontent.com/supermap/iConnector-Leaflet/master/examples/data/indonesia.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Tambahkan layer GeoJSON ke peta dengan gaya dan interaksi
+                        geojsonLayer = L.geoJson(data, {
+                            style: style,
+                            onEachFeature: onEachFeature
+                        }).addTo(map);
+                    })
+                    .catch(error => {
+                        console.error('Error loading the GeoJSON data:', error);
+                        // Tampilkan pesan error jika peta gagal dimuat
+                        document.getElementById('mapid').innerHTML = '<p style="color: red; text-align: center;">Gagal memuat peta provinsi. Pastikan Anda terhubung ke internet.</p>';
+                    });
+            }
+
+            // --- FUNGSI-FUNGSI UNTUK TES & KUIS ---
+            const quizQuestionElement = document.getElementById('quiz-question');
+            const quizOptionsElement = document.getElementById('quiz-options');
+            const prevQuestionBtn = document.getElementById('prev-question-btn');
+            const nextQuestionBtn = document.getElementById('next-question-btn');
+            const submitQuizBtn = document.getElementById('submit-quiz-btn');
+            const quizResultsElement = document.getElementById('quiz-results');
+            const resultTextElement = document.getElementById('result-text');
+            const resultFeedbackElement = document.getElementById('result-feedback');
+            const restartQuizBtn = document.getElementById('restart-quiz-btn');
+            const quizArea = document.getElementById('quiz-area');
+
+            /**
+             * Memulai ulang kuis atau memulai kuis pertama kali.
+             */
+            function startQuiz() {
+                currentQuestionIndex = 0;
+                quizScore = 0;
+                userAnswers = new Array(quizQuestions.length).fill(null); // Reset jawaban pengguna
+                quizArea.style.display = 'block';
+                quizResultsElement.style.display = 'none';
+                displayQuestion();
+            }
+
+            /**
+             * Menampilkan pertanyaan kuis saat ini dan opsi jawabannya.
+             */
+            function displayQuestion() {
+                const currentQuestion = quizQuestions[currentQuestionIndex];
+                quizQuestionElement.textContent = `Soal ${currentQuestionIndex + 1}: ${currentQuestion.question}`;
+                quizOptionsElement.innerHTML = ''; // Kosongkan opsi sebelumnya
+
+                currentQuestion.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.classList.add('quiz-option-btn');
+                    button.textContent = option;
+                    button.dataset.index = index; // Simpan indeks opsi
+                    if (userAnswers[currentQuestionIndex] === index) {
+                        button.classList.add('selected'); // Tandai opsi yang sudah dipilih
+                    }
+                    button.addEventListener('click', () => selectOption(index));
+                    quizOptionsElement.appendChild(button);
+                });
+
+                // Atur visibilitas tombol navigasi
+                prevQuestionBtn.style.display = currentQuestionIndex > 0 ? 'inline-flex' : 'none';
+                nextQuestionBtn.style.display = currentQuestionIndex < quizQuestions.length - 1 ? 'inline-flex' : 'none';
+                submitQuizBtn.style.display = currentQuestionIndex === quizQuestions.length - 1 ? 'inline-flex' : 'none';
+            }
+
+            /**
+             * Menyimpan pilihan jawaban pengguna.
+             * @param {number} selectedIndex - Indeks opsi yang dipilih pengguna.
+             */
+            function selectOption(selectedIndex) {
+                userAnswers[currentQuestionIndex] = selectedIndex;
+                // Hapus kelas 'selected' dari semua opsi dan tambahkan ke yang dipilih
+                quizOptionsElement.querySelectorAll('.quiz-option-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                quizOptionsElement.querySelector(`[data-index="${selectedIndex}"]`).classList.add('selected');
+            }
+
+            /**
+             * Pindah ke pertanyaan berikutnya.
+             */
+            function nextQuestion() {
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    displayQuestion();
+                }
+            }
+
+            /**
+             * Pindah ke pertanyaan sebelumnya.
+             */
+            function prevQuestion() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    displayQuestion();
+                }
+            }
+
+            /**
+             * Mengirimkan kuis dan menampilkan hasilnya.
+             */
+            function submitQuiz() {
+                quizScore = 0;
+                for (let i = 0; i < quizQuestions.length; i++) {
+                    if (userAnswers[i] === quizQuestions[i].answer) {
+                        quizScore++;
+                    }
+                }
+
+                quizArea.style.display = 'none';
+                quizResultsElement.style.display = 'block';
+
+                resultTextElement.textContent = `Anda menjawab ${quizScore} dari ${quizQuestions.length} pertanyaan dengan benar.`;
+
+                let feedbackMessage = "";
+                if (quizScore === quizQuestions.length) {
+                    feedbackMessage = "Luar biasa! Pengetahuan Anda tentang kesehatan mental dan budaya sangat baik!";
+                    resultFeedbackElement.className = 'quiz-feedback positive';
+                } else if (quizScore >= quizQuestions.length / 2) {
+                    feedbackMessage = "Cukup bagus! Anda memiliki pemahaman yang baik. Teruslah belajar untuk meningkatkan pengetahuan Anda.";
+                    resultFeedbackElement.className = 'quiz-feedback'; // Default
+                } else {
+                    feedbackMessage = "Jangan khawatir! Ini kesempatan bagus untuk belajar lebih banyak. Mari jelajahi fitur edukasi kami!";
+                    resultFeedbackElement.className = 'quiz-feedback negative';
+                }
+                resultFeedbackElement.textContent = feedbackMessage;
+            }
+
+            // Event listener untuk tombol navigasi kuis
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            prevQuestionBtn.addEventListener('click', prevQuestion);
+            submitQuizBtn.addEventListener('click', submitQuiz);
+            restartQuizBtn.addEventListener('click', startQuiz);
+
+
+            // --- FUNGSI-FUNGSI UNTUK KALENDER SELF-CARE ---
+            const currentMonthYearElement = document.getElementById('currentMonthYear');
+            const prevMonthBtn = document.getElementById('prevMonthBtn');
+            const nextMonthBtn = document.getElementById('nextMonthBtn');
+            const calendarGrid = document.getElementById('calendarGrid');
+            const eventDateInput = document.getElementById('eventDate');
+            const eventTextInput = document.getElementById('eventText');
+            const addEventBtn = document.getElementById('addEventBtn');
+            const eventListElement = document.getElementById('eventList');
+            const noEventsMessage = document.getElementById('noEventsMessage');
+
+
+            /**
+             * Merender kalender untuk bulan dan tahun tertentu.
+             * @param {number} year - Tahun yang akan dirender.
+             * @param {number} month - Bulan yang akan dirender (0-11).
+             */
+            function renderCalendar(year, month) {
+                calendarGrid.innerHTML = `
+                    <div class="day-name">Min</div>
+                    <div class="day-name">Sen</div>
+                    <div class="day-name">Sel</div>
+                    <div class="day-name">Rab</div>
+                    <div class="day-name">Kam</div>
+                    <div class="day-name">Jum</div>
+                    <div class="day-name">Sab</div>
+                `; // Reset grid, keeping day names
+
+                const firstDayOfMonth = new Date(year, month, 1);
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const startDay = firstDayOfMonth.getDay(); // 0 for Sunday, 1 for Monday...
+
+                currentMonthYearElement.textContent = `${firstDayOfMonth.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}`;
+
+                // Tambahkan sel kosong untuk hari-hari sebelum tanggal 1
+                for (let i = 0; i < startDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.classList.add('calendar-day', 'empty');
+                    calendarGrid.appendChild(emptyDay);
+                }
+
+                // Tambahkan hari-hari dalam sebulan
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, month, day);
+                    const dayElement = document.createElement('div');
+                    dayElement.classList.add('calendar-day');
+                    dayElement.dataset.date = date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+                    dayElement.innerHTML = `<span class="day-number">${day}</span>`;
+
+                    // Tandai hari ini
+                    const today = new Date();
+                    if (date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear()) {
+                        dayElement.classList.add('current-day');
+                    }
+
+                    // Tandai hari dengan event
+                    const eventKey = dayElement.dataset.date;
+                    if (calendarEvents[eventKey] && calendarEvents[eventKey].length > 0) {
+                        dayElement.classList.add('has-event');
+                        const eventDot = document.createElement('div');
+                        eventDot.classList.add('event-dot');
+                        dayElement.appendChild(eventDot);
+                    }
+
+                    dayElement.addEventListener('click', () => showEventsForDate(eventKey));
+                    calendarGrid.appendChild(dayElement);
+                }
+                displayEvents(); // Perbarui daftar event di bawah kalender
+            }
+
+            /**
+             * Menampilkan aktivitas untuk tanggal yang dipilih di bawah kalender.
+             * @param {string} dateKey - Tanggal dalam format YYYY-MM-DD.
+             */
+            function showEventsForDate(dateKey) {
+                // Opsional: Anda bisa highlight tanggal yang dipilih di sini
+                // Atau tampilkan modal/popup dengan detail event untuk tanggal tersebut
+                // Untuk kesederhanaan, kita akan selalu me-render semua event di bawah
+                // dan pengguna bisa melihat tanggalnya di daftar.
+                // Jika ingin fokus ke 1 tanggal, bisa seperti ini:
+                // renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Render ulang kalender
+                // alert(`Aktivitas untuk ${dateKey}: ${calendarEvents[dateKey] ? calendarEvents[dateKey].map(e => e.text).join(', ') : 'Tidak ada'}`);
+                displayEvents();
+                // Opsional: Gulir ke bagian daftar event
+                eventListElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            /**
+             * Menambahkan event baru ke kalender.
+             */
+            function addEvent() {
+                const date = eventDateInput.value;
+                const text = eventTextInput.value.trim();
+
+                if (date && text) {
+                    if (!calendarEvents[date]) {
+                        calendarEvents[date] = [];
+                    }
+                    calendarEvents[date].push({ id: Date.now(), text: text }); // Gunakan timestamp sebagai ID unik
+                    localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+
+                    eventDateInput.value = '';
+                    eventTextInput.value = '';
+                    renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Render ulang kalender untuk menampilkan dot event
+                    displayEvents(); // Perbarui daftar event
+                } else {
+                    alert('Mohon lengkapi tanggal dan aktivitas.');
+                }
+            }
+
+            /**
+             * Menghapus event dari kalender.
+             * @param {string} dateKey - Tanggal event.
+             * @param {number} eventId - ID unik event yang akan dihapus.
+             */
+            function deleteEvent(dateKey, eventId) {
+                if (calendarEvents[dateKey]) {
+                    calendarEvents[dateKey] = calendarEvents[dateKey].filter(event => event.id !== eventId);
+                    if (calendarEvents[dateKey].length === 0) {
+                        delete calendarEvents[dateKey]; // Hapus entri tanggal jika tidak ada event lagi
+                    }
+                    localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+                    renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth()); // Render ulang kalender
+                    displayEvents(); // Perbarui daftar event
+                }
+            }
+
+            /**
+             * Menampilkan daftar semua event yang ada.
+             */
+            function displayEvents() {
+                eventListElement.innerHTML = '<h4>Aktivitas Terjadwal</h4>';
+                const sortedDates = Object.keys(calendarEvents).sort(); // Urutkan tanggal
+
+                let hasEvents = false;
+                sortedDates.forEach(dateKey => {
+                    if (calendarEvents[dateKey] && calendarEvents[dateKey].length > 0) {
+                        hasEvents = true;
+                        const dateHeading = document.createElement('h5');
+                        dateHeading.textContent = new Date(dateKey + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                        eventListElement.appendChild(dateHeading);
+
+                        calendarEvents[dateKey].forEach(event => {
+                            const eventItem = document.createElement('div');
+                            eventItem.classList.add('event-item');
+                            eventItem.innerHTML = `
+                                <span>${event.text}</span>
+                                <button class="delete-event-btn" data-date="${dateKey}" data-id="${event.id}">Hapus</button>
+                            `;
+                            eventListElement.appendChild(eventItem);
+                        });
+                    }
+                });
+
+                if (!hasEvents) {
+                    const noEventsMsg = document.createElement('p');
+                    noEventsMsg.id = 'noEventsMessage';
+                    noEventsMsg.style.color = 'var(--text-light)';
+                    noEventsMsg.textContent = 'Belum ada aktivitas self-care yang ditambahkan.';
+                    eventListElement.appendChild(noEventsMsg);
+                }
+
+                // Tambahkan event listener untuk tombol hapus (setelah elemen dibuat)
+                document.querySelectorAll('.delete-event-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const date = e.target.dataset.date;
+                        const id = parseInt(e.target.dataset.id);
+                        deleteEvent(date, id);
+                    });
+                });
+            }
+
+            // Event listeners untuk navigasi kalender
+            prevMonthBtn.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                renderCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+            });
+
+            addEventBtn.addEventListener('click', addEvent);
+
+
+            // --- FUNGSI-FUNGSI UNTUK VALIDASI FORM ---
+
+            /**
+             * Menampilkan pesan error di bawah elemen input tertentu.
+             * @param {string} elementId - ID dari elemen input (tanpa akhiran 'Error').
+             * @param {string} message - Pesan error yang akan ditampilkan.
+             */
+            function showError(elementId, message) {
+                const errorElement = document.getElementById(elementId + 'Error');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            /**
+             * Menyembunyikan pesan error di bawah elemen input tertentu.
+             * @param {string} elementId - ID dari elemen input (tanpa akhiran 'Error').
+             */
+            function clearError(elementId) {
+                const errorElement = document.getElementById(elementId + 'Error');
+                if (errorElement) {
+                    errorElement.textContent = '';
+                    errorElement.style.display = 'none';
+                }
+            }
+
+            /**
+             * Memvalidasi format email menggunakan Regular Expression.
+             * @param {string} email - String email yang akan divalidasi.
+             * @returns {boolean} True jika format email valid, false jika tidak.
+             */
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            /**
+             * Menghapus semua pesan error yang ditampilkan pada form login dan register.
+             */
+            function clearAllAuthErrors() {
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.textContent = '';
+                    el.style.display = 'none';
+                });
+            }
+
+            // --- EVENT LISTENERS (HANDLER UNTUK INTERAKSI PENGGUNA) ---
+
+            // Event listener untuk tombol hamburger (mobile menu)
+            mobileMenuToggle.addEventListener('click', () => {
+                navbarLinks.classList.toggle('active');
+                mobileMenuToggle.classList.toggle('active');
+            });
+
+            // Event listeners untuk link navigasi di navbar
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    // Tutup menu mobile jika aktif saat link diklik
+                    if (navbarLinks.classList.contains('active')) {
+                        navbarLinks.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+
+                    // Hapus kelas 'active' dari semua link navigasi
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    // Tambahkan kelas 'active' ke link yang baru diklik
+                    link.classList.add('active');
+
+                    // Logika untuk menampilkan section yang sesuai
+                    if (link.href.includes('#welcome')) {
+                        showSection(welcomeSection);
+                    } else if (link.href.includes('#features')) {
+                        showSection(featuresSection);
+                    } else if (link.href.includes('#login')) {
+                        showSection(loginSection);
+                        // Pastikan form login yang tampil default saat pindah ke section login
+                        loginContainer.style.display = 'block';
+                        registerContainer.style.display = 'none';
+                        clearAllAuthErrors(); // Bersihkan error saat beralih
+                    } else if (link.id === 'navBudayaLink') {
+                        showSection(contentSection);
+                        showContentTab('budaya-edukasi-list');
+                    } else if (link.id === 'navPetaLink') {
+                        showSection(contentSection);
+                        showContentTab('peta-lokasi');
+                    } else if (link.id === 'navTesLink') {
+                        showSection(contentSection);
+                        showContentTab('tes-kuis');
+                    } else if (link.id === 'navKalenderLink') {
+                        showSection(contentSection);
+                        showContentTab('kalender-selfcare');
+                    }
+                });
+            });
+
+            // Event listener untuk tombol "Mulai Jelajahi Fitur" di Welcome Section
+            startButton.addEventListener('click', (event) => {
+                event.preventDefault(); // Mencegah perilaku default (meloncat ke anchor)
+                showSection(featuresSection);
+                // Update status 'active' di navbar
+                navLinks.forEach(link => link.classList.remove('active'));
+                document.querySelector('a[href="#features"]').classList.add('active');
+            });
+
+            // Event listeners untuk tombol "Pelajari Lebih Lanjut" di setiap Feature Card
+            featureCards.forEach(card => {
+                card.querySelector('.view-feature-btn').addEventListener('click', () => {
+                    const targetTab = card.dataset.targetTab; // Ambil nilai 'data-target-tab' dari kartu
+
+                    // Tentukan section dan tab yang akan ditampilkan berdasarkan targetTab
+                    if (['budaya-edukasi-list', 'peta-lokasi', 'tes-kuis', 'kalender-selfcare'].includes(targetTab)) {
+                        showSection(contentSection);
+                        showContentTab(targetTab);
+                    } else if (targetTab === 'login') {
+                        showSection(loginSection);
+                        loginContainer.style.display = 'block';
+                        registerContainer.style.display = 'none';
+                        clearAllAuthErrors();
+                    }
+
+                    // Update status 'active' di navbar sesuai dengan section/tab yang baru
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    let activeLink;
+                    if (targetTab === 'budaya-edukasi-list') activeLink = document.getElementById('navBudayaLink');
+                    else if (targetTab === 'peta-lokasi') activeLink = document.getElementById('navPetaLink');
+                    else if (targetTab === 'tes-kuis') activeLink = document.getElementById('navTesLink');
+                    else if (targetTab === 'kalender-selfcare') activeLink = document.getElementById('navKalenderLink');
+                    else activeLink = document.querySelector('a[href="#features"]'); // Default kembali ke Fitur jika tidak ada link khusus
+                    if (activeLink) activeLink.classList.add('active');
+                });
+            });
+
+            // Event listeners untuk tombol "Baca Selengkapnya" dan klik pada "Item Card"
+            readMoreButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Mencegah event dari parent item-card ikut terpicu
+                    const itemId = button.dataset.itemId;
+                    showContentDetail(itemId);
+                });
+            });
+            itemCards.forEach(card => {
+                card.addEventListener('click', (event) => {
+                    // Hanya picu showContentDetail jika klik bukan pada tombol "Baca Selengkapnya"
+                    if (!event.target.classList.contains('read-button')) {
+                        const itemId = card.dataset.itemId;
+                        showContentDetail(itemId);
+                    }
+                });
+            });
+
+            // Event listener untuk tombol "Kembali ke Daftar" (dari detail konten ke daftar budaya/edukasi)
+            backToListBtn.addEventListener('click', () => {
+                contentDetailView.style.display = 'none';
+                budayaEdukasiList.style.display = 'block'; // Kembali ke daftar budaya/edukasi
+                backToListBtn.style.display = 'none'; // Sembunyikan tombol ini lagi
+                contentSection.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Event listener untuk tombol "Kembali ke Fitur" (dari content section ke features section)
+            backToFeaturesBtn.addEventListener('click', () => {
+                showSection(featuresSection);
+                // Update status 'active' di navbar
+                navLinks.forEach(link => link.classList.remove('active'));
+                document.querySelector('a[href="#features"]').classList.add('active');
+            });
+
+            // --- LOGIKA FORM LOGIN DAN REGISTER ---
+
+            // Event listener untuk link "Daftar Sekarang" (pindah dari login ke register)
+            showRegisterLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                loginContainer.style.display = 'none';
+                registerContainer.style.display = 'block';
+                clearAllAuthErrors(); // Bersihkan pesan error saat beralih form
+            });
+
+            // Event listener untuk link "Login Sekarang" (pindah dari register ke login)
+            showLoginLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                registerContainer.style.display = 'none';
+                loginContainer.style.display = 'block';
+                clearAllAuthErrors(); // Bersihkan pesan error saat beralih form
+            });
+
+            // Event listener untuk submit form Login
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Mencegah halaman me-reload
+                clearAllAuthErrors(); // Hapus pesan error sebelumnya
+
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                let isValid = true; // Flag untuk validasi
+
+                // Validasi Email
+                if (!validateEmail(email)) {
+                    showError('loginEmail', 'Format email tidak valid.');
+                    isValid = false;
+                }
+                // Validasi Password
+                if (password.length < 6) {
+                    showError('loginPassword', 'Password minimal 6 karakter.');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    // Jika semua validasi sukses (INI ADALAH SIMULASI)
+                    alert('Login berhasil! Selamat datang di SENUSA.');
+                    loginForm.reset(); // Kosongkan form
+                    showSection(welcomeSection); // Kembali ke beranda
+                    // Update status 'active' di navbar
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    document.querySelector('a[href="#welcome"]').classList.add('active');
+                    // Pada aplikasi nyata, Anda akan mengirim data ke server di sini
+                    // Contoh: fetch('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+                }
+            });
+
+            // Event listener untuk submit form Register
+            registerForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Mencegah halaman me-reload
+                clearAllAuthErrors(); // Hapus pesan error sebelumnya
+
+                const name = document.getElementById('registerName').value.trim();
+                const email = document.getElementById('registerEmail').value.trim();
+                const password = document.getElementById('registerPassword').value.trim();
+                const confirmPassword = document.getElementById('confirmPassword').value.trim();
+                let isValid = true; // Flag untuk validasi
+
+                // Validasi Nama
+                if (name.length < 3) {
+                    showError('registerName', 'Nama minimal 3 karakter.');
+                    isValid = false;
+                }
+                // Validasi Email
+                if (!validateEmail(email)) {
+                    showError('registerEmail', 'Format email tidak valid.');
+                    isValid = false;
+                }
+                // Validasi Password
+                if (password.length < 6) {
+                    showError('registerPassword', 'Password minimal 6 karakter.');
+                    isValid = false;
+                }
+                // Validasi Konfirmasi Password
+                if (password !== confirmPassword) {
+                    showError('confirmPassword', 'Konfirmasi password tidak cocok.');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    // Jika semua validasi sukses (INI ADALAH SIMULASI)
+                    alert('Registrasi berhasil! Akun Anda telah dibuat.');
+                    registerForm.reset(); // Kosongkan form
+                    // Pindah otomatis ke form login setelah registrasi sukses
+                    loginContainer.style.display = 'block';
+                    registerContainer.style.display = 'none';
+                    alert('Sekarang Anda bisa login dengan akun baru Anda.');
+                    // Pada aplikasi nyata, Anda akan mengirim data ke server di sini
+                    // Contoh: fetch('/api/register', { method: 'POST', body: JSON.stringify({ name, email, password }) })
+                }
+            });
+
+            // --- INISIALISASI SAAT HALAMAN PERTAMA KALI DIMUAT ---
+            // Secara default, tampilkan bagian "Welcome" saat halaman dimuat
+            showSection(welcomeSection);
+        });
+    </script>
+</body>
+</html>
